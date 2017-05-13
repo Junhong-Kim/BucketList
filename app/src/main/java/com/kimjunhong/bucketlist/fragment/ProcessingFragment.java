@@ -43,7 +43,7 @@ public class ProcessingFragment extends Fragment {
         BucketItem[] item = new BucketItem[5];
 
         for(int i = 0; i < 5; i++) {
-            item[i] = new BucketItem("완료 : " + i, "2017-05-11");
+            item[i] = new BucketItem("우주 여행", "2017년 5월 11일");
             items.add(item[i]);
         }
 

@@ -5,9 +5,11 @@ import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.adapter.TabPagerAdapter;
@@ -24,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.tabLayout) TabLayout tabLayout;
     @BindView(R.id.viewPager) ViewPager viewPager;
+    @BindView(R.id.button_add) ImageButton addButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,11 +36,13 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
+//        ActionBar actionBar = getSupportActionBar();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
 
         // 뷰페이저 초기화
         initViewPager();
+        // 뷰 설정
+        initView();
     }
 
     @Override
@@ -47,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         this.setTitle(null);
     }
 
-    private void  initViewPager() {
+    private void initViewPager() {
         List<Fragment> listFragments = new ArrayList<>();
         listFragments.add(new ProcessingFragment());
         listFragments.add(new CompletedFragment());
@@ -55,8 +60,8 @@ public class MainActivity extends AppCompatActivity {
         TabPagerAdapter fragmentPagerAdapter = new TabPagerAdapter(getSupportFragmentManager(), listFragments);
         viewPager.setAdapter(fragmentPagerAdapter);
 
-        tabLayout.addTab(tabLayout.newTab().setText("A"));
-        tabLayout.addTab(tabLayout.newTab().setText("B"));
+        tabLayout.addTab(tabLayout.newTab().setText("진행중 버킷 :<"));
+        tabLayout.addTab(tabLayout.newTab().setText("완료한 버킷 :D"));
         tabLayout.setTabTextColors(Color.LTGRAY, Color.BLUE);
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
@@ -81,6 +86,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
 
+            }
+        });
+    }
+
+    private void initView() {
+        addButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
+                // DB에 추가, 화면 Refresh
             }
         });
     }

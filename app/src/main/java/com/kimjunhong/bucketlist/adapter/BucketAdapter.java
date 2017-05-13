@@ -1,6 +1,7 @@
 package com.kimjunhong.bucketlist.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
+import com.kimjunhong.bucketlist.activity.DetailActivity;
 import com.kimjunhong.bucketlist.item.BucketItem;
 
 import java.util.Collections;
@@ -44,6 +46,7 @@ public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder
             @Override
             public void onClick(View view) {
                 Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show();
+                context.startActivity(new Intent(context, DetailActivity.class));
             }
         });
 
@@ -67,9 +70,9 @@ public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder
         notifyItemRangeChanged(position, items.size());
     }
 
-    public void swapItem(int fromposition, int toPosition) {
-        Collections.swap(items, fromposition, toPosition);
-        notifyItemMoved(fromposition, toPosition);
+    public void swapItem(int fromPosition, int toPosition) {
+        Collections.swap(items, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

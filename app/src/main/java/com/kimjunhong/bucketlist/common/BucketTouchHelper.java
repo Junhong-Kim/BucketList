@@ -1,5 +1,6 @@
 package com.kimjunhong.bucketlist.common;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -19,6 +20,7 @@ import com.kimjunhong.bucketlist.adapter.BucketAdapter;
 
 public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
     private BucketAdapter adapter;
+    Context context;
 
     public BucketTouchHelper(BucketAdapter bucketAdapter) {
         // Up|Down DRAG 방향, Left|Right SWIPE 방향
@@ -52,11 +54,17 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
 
         if (direction == ItemTouchHelper.LEFT) {
             // 삭제 기능
-            adapter.removeItem(position);
+            // 삭제할것인지 물어 보고 삭제
+            if(true) {
+                adapter.removeItem(position);
+            } else {
+
+            }
         } else {
-            // 추가 기능(processing -> completed)
+            // 추가 기능(processing -> completed), 추가한 뒤 삭제
             adapter.removeItem(position);
             adapter.addItem(position);
+            //context.startActivity(new Intent(context, DetailActivity.class));
         }
     }
 

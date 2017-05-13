@@ -10,8 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.kimjunhong.bucketlist.R;
-import com.kimjunhong.bucketlist.adapter.BucketAdapter;
-import com.kimjunhong.bucketlist.item.BucketItem;
+import com.kimjunhong.bucketlist.adapter.CompletedBucketAdapter;
+import com.kimjunhong.bucketlist.item.CompletedBucketItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,7 @@ import butterknife.ButterKnife;
 
 public class CompletedFragment extends Fragment {
     @BindView(R.id.completed_list) RecyclerView completedList;
-    BucketAdapter adapter;
+    CompletedBucketAdapter adapter;
 
     @Nullable
     @Override
@@ -37,15 +37,21 @@ public class CompletedFragment extends Fragment {
         LinearLayoutManager lm = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         completedList.setLayoutManager(lm);
 
-        List<BucketItem> items = new ArrayList<>();
-        BucketItem[] item = new BucketItem[5];
+        List<CompletedBucketItem> items = new ArrayList<>();
+        CompletedBucketItem[] item = new CompletedBucketItem[5];
+
+
+        item[0] = new CompletedBucketItem("번지점프", "친구", "2017년 5월 11일", "강원도", R.drawable.icon_picture);
+        item[1] = new CompletedBucketItem("스카이 다이빙", "친구", "2017년 5월 11일", "세부", R.drawable.icon_picture);
+        item[2] = new CompletedBucketItem("유럽 여행", "친구", "2017년 5월 11일", "영국", R.drawable.icon_picture);
+        item[3] = new CompletedBucketItem("자전거 여행", "친구", "2017년 5월 11일", "부산", R.drawable.icon_picture);
+        item[4] = new CompletedBucketItem("국토대장정", "친구", "2017년 5월 11일", "땅끝마을", R.drawable.icon_picture);
 
         for(int i = 0; i < 5; i++) {
-            item[i] = new BucketItem("완료 : " + i, "2017-05-11");
             items.add(item[i]);
         }
 
-        adapter = new BucketAdapter(getActivity(), items);
+        adapter = new CompletedBucketAdapter(getActivity(), items);
         completedList.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
