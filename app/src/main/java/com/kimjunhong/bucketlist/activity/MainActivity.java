@@ -2,17 +2,21 @@ package com.kimjunhong.bucketlist.activity;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.adapter.TabPagerAdapter;
+import com.kimjunhong.bucketlist.common.BackPressCloseHandler;
 import com.kimjunhong.bucketlist.fragment.CompletedFragment;
 import com.kimjunhong.bucketlist.fragment.ProcessingFragment;
 
@@ -27,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.tabLayout) TabLayout tabLayout;
     @BindView(R.id.viewPager) ViewPager viewPager;
     @BindView(R.id.button_add) ImageButton addButton;
+    @BindView(R.id.speech_bubble) LinearLayout speechBubble;
+    private BackPressCloseHandler backPressCloseHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         initViewPager();
         // 뷰 설정
         initView();
+        backPressCloseHandler = new BackPressCloseHandler(this);
     }
 
     @Override
@@ -94,9 +101,27 @@ public class MainActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(MainActivity.this, "clicked", Toast.LENGTH_SHORT).show();
+                Animation fadeIn = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_in);
+                speechBubble.startAnimation(fadeIn);
+                speechBubble.setVisibility(View.VISIBLE);
+
+                // 2초 뒤 사라지기
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Animation fadeOut = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.fade_out);
+                        speechBubble.startAnimation(fadeOut);
+                        speechBubble.setVisibility(View.INVISIBLE);
+                    }
+                }, 2000);
+
                 // DB에 추가, 화면 Refresh
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        backPressCloseHandler.onBackPressed();
     }
 }

@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.adapter.CompletedBucketAdapter;
+import com.kimjunhong.bucketlist.common.SimpleDividerItemDecoration;
 import com.kimjunhong.bucketlist.item.CompletedBucketItem;
 
 import java.util.ArrayList;
@@ -51,6 +52,7 @@ public class CompletedFragment extends Fragment {
             items.add(item[i]);
         }
 
+        completedList.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         adapter = new CompletedBucketAdapter(getActivity(), items);
         completedList.setAdapter(adapter);
         adapter.notifyDataSetChanged();

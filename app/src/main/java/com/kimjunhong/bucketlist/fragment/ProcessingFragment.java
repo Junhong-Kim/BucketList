@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.adapter.BucketAdapter;
 import com.kimjunhong.bucketlist.common.BucketTouchHelper;
+import com.kimjunhong.bucketlist.common.SimpleDividerItemDecoration;
 import com.kimjunhong.bucketlist.item.BucketItem;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class ProcessingFragment extends Fragment {
             items.add(item[i]);
         }
 
+        processingList.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
         adapter = new BucketAdapter(getActivity(), items);
         processingList.setAdapter(adapter);
 

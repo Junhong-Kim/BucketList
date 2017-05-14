@@ -1,11 +1,17 @@
 package com.kimjunhong.bucketlist.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -27,6 +33,7 @@ import butterknife.ButterKnife;
 public class CompletedBucketAdapter extends RecyclerView.Adapter<CompletedBucketAdapter.ViewHolder> {
     Context context;
     List<CompletedBucketItem> items;
+    Dialog dialog;
 
     public CompletedBucketAdapter(Context context, List<CompletedBucketItem> items) {
         this.context = context;
@@ -45,8 +52,49 @@ public class CompletedBucketAdapter extends RecyclerView.Adapter<CompletedBucket
         holder.layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, "clicked", Toast.LENGTH_SHORT).show();
                 context.startActivity(new Intent(context, DetailActivity.class));
+            }
+        });
+        holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                // 다이얼로그 생성
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                // 커스텀 다이얼로그 가져오기
+                View customLayout = View.inflate(context, R.layout.dialog_delete,null);
+                // 빌더에 다이얼로그 적용
+                builder.setView(customLayout);
+
+                dialog = builder.create();
+                // 빌더 크기 적용
+                WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+                lp.copyFrom(dialog.getWindow().getAttributes());
+                lp.width = 1000;
+                lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+
+                dialog.show();
+
+                // 디폴트 다이얼로그 투명화
+                Window w = dialog.getWindow();
+                w.setAttributes(lp);
+                w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                //삭제, 취소 클릭
+                customLayout.findViewById(R.id.dialog_button_delete).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(context, "삭제 되었습니다 :'(", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                });
+                customLayout.findViewById(R.id.dialog_button_delete_cancel).setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Toast.makeText(context, "잘 생각하셨어요 :D", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
+                });
+                return true;
             }
         });
         holder.title.setText(item.getTitle());

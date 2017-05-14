@@ -1,6 +1,5 @@
 package com.kimjunhong.bucketlist.common;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -20,7 +19,6 @@ import com.kimjunhong.bucketlist.adapter.BucketAdapter;
 
 public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
     private BucketAdapter adapter;
-    Context context;
 
     public BucketTouchHelper(BucketAdapter bucketAdapter) {
         // Up|Down DRAG 방향, Left|Right SWIPE 방향
@@ -41,7 +39,7 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
     public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
         /* itemView DRAG */
         View itemView = viewHolder.itemView;
-        itemView.setBackgroundColor(Color.parseColor("#cecece"));
+        itemView.setBackgroundColor(Color.parseColor("#EEEEEE"));
 
         adapter.swapItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
         return false;
@@ -54,17 +52,13 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
 
         if (direction == ItemTouchHelper.LEFT) {
             // 삭제 기능
-            // 삭제할것인지 물어 보고 삭제
-            if(true) {
-                adapter.removeItem(position);
-            } else {
-
-            }
+            adapter.delete();
+            adapter.removeItem(position);
         } else {
             // 추가 기능(processing -> completed), 추가한 뒤 삭제
+            adapter.complete();
             adapter.removeItem(position);
             adapter.addItem(position);
-            //context.startActivity(new Intent(context, DetailActivity.class));
         }
     }
 
@@ -84,11 +78,11 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
 
             if (dX > 0) {
                 // icon Resource 가져오기, 여기서는 recyclerView를 활용하여 Context를 가져왔음, 무슨 방법이던 Context만 가져오면 되는데 여기서는 외부 메서드 안 만들기 위해 이렇게 작성
-                icon = BitmapFactory.decodeResource(recyclerView.getContext().getResources(), R.drawable.icon_add);
+                icon = BitmapFactory.decodeResource(recyclerView.getContext().getResources(), R.drawable.icon_complete);
 
                 /* Set your color for positive displacement */
-                // p.setColor(Color.parseColor("#388E3C"));
-                p.setARGB(255, 0, 255, 0);
+                p.setColor(Color.parseColor("#4CAF50"));
+                // p.setARGB(255, 0, 255, 0);
 
                 // Draw Rect with varying right side, equal to displacement dX
                 RectF background = new RectF((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom());
@@ -102,11 +96,11 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
                 c.drawBitmap(icon, null, icon_dest, p);
 
             } else {
-                icon = BitmapFactory.decodeResource(recyclerView.getContext().getResources(), R.drawable.icon_remove);
+                icon = BitmapFactory.decodeResource(recyclerView.getContext().getResources(), R.drawable.icon_delete);
 
                 /* Set your color for negative displacement */
-                // p.setColor(Color.parseColor("#388E3C"));
-                p.setARGB(255, 255, 0, 0);
+                p.setColor(Color.parseColor("#F44336"));
+                // p.setARGB(255, 255, 0, 0);
 
                 // Draw Rect with varying left side, equal to the item's right side
                 // plus negative displacement dX
