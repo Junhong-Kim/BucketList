@@ -19,11 +19,13 @@ import com.kimjunhong.bucketlist.adapter.BucketAdapter;
 
 public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
     private BucketAdapter adapter;
+    private RecyclerView recyclerView;
 
-    public BucketTouchHelper(BucketAdapter bucketAdapter) {
+    public BucketTouchHelper(BucketAdapter bucketAdapter, RecyclerView recyclerView) {
         // Up|Down DRAG 방향, Left|Right SWIPE 방향
         super(ItemTouchHelper.UP | ItemTouchHelper.DOWN, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT);
         this.adapter = bucketAdapter;
+        this.recyclerView = recyclerView;
     }
 
     @Override
@@ -52,11 +54,11 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
 
         if (direction == ItemTouchHelper.LEFT) {
             // 삭제 기능
-            adapter.delete();
+            adapter.delete(recyclerView);
             adapter.removeItem(position);
         } else {
             // 추가 기능(processing -> completed), 추가한 뒤 삭제
-            adapter.complete();
+            adapter.complete(recyclerView);
             adapter.removeItem(position);
             adapter.addItem(position);
         }
@@ -104,8 +106,7 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
 
                 // Draw Rect with varying left side, equal to the item's right side
                 // plus negative displacement dX
-                RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(),
-                        (float) itemView.getRight(), (float) itemView.getBottom());
+                RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
                 c.drawRect(background, p);
 
                 // icon과 동시에 사라지게 하기 위해서 clipRect 함

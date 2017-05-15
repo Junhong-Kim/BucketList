@@ -52,7 +52,7 @@ public class ProcessingFragment extends Fragment {
         adapter = new BucketAdapter(getActivity(), items);
         processingList.setAdapter(adapter);
 
-        ItemTouchHelper.Callback callback = new BucketTouchHelper(adapter);
+        ItemTouchHelper.Callback callback = new BucketTouchHelper(adapter, processingList);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(processingList);
 

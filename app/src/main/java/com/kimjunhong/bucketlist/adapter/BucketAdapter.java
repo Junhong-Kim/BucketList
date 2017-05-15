@@ -4,8 +4,14 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Handler;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,12 +120,91 @@ public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder
         notifyItemMoved(fromPosition, toPosition);
     }
 
-    public void complete() {
-        Toast.makeText(context, "완료!! :D", Toast.LENGTH_SHORT).show();
+    public void complete(RecyclerView recyclerView) {
+        // Snackbar 텍스트 설정
+        SpannableStringBuilder spanText = new SpannableStringBuilder();
+        spanText.append("버킷을 ");
+        int emphasisStart = spanText.length();
+        spanText.append("완료");
+        // 강조 텍스트 색상 (16진수 ARGB)
+        spanText.setSpan(new ForegroundColorSpan(0xFF4CAF50), emphasisStart, spanText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // 강조 텍스트 bold
+        spanText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), emphasisStart, spanText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spanText.append(" 했습니다");
+
+        // 2초(LENGTH_SHORT) 뒤 완료 처리
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                /*
+                완료 기능
+                */
+            }
+        }, 2000);
+
+        Snackbar s = Snackbar.make(recyclerView, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*
+                취소 기능
+                 */
+            }
+        });
+
+        View v = s.getView();
+        //v.setBackgroundColor(Color.parseColor("#4CAF50"));
+
+        TextView text = (TextView) v.findViewById(android.support.design.R.id.snackbar_text);
+        text.setTextColor(Color.WHITE);
+
+        TextView action = (TextView) v.findViewById(android.support.design.R.id.snackbar_action);
+        action.setTextColor(Color.WHITE);
+
+        s.show();
     }
 
-    public void delete() {
-        Toast.makeText(context, "삭제 되었습니다 :'(", Toast.LENGTH_SHORT).show();
+    public void delete(View view) {
+        // Snackbar 텍스트 설정
+        SpannableStringBuilder spanText = new SpannableStringBuilder();
+        spanText.append("버킷을 ");
+        int emphasisStart = spanText.length();
+        spanText.append("삭제");
+        // 강조 텍스트 색상 (16진수 ARGB)
+        spanText.setSpan(new ForegroundColorSpan(0xFFF44336), emphasisStart, spanText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        // 강조 텍스트 bold
+        spanText.setSpan(new StyleSpan(android.graphics.Typeface.BOLD), emphasisStart, spanText.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        spanText.append(" 했습니다");
+
+        // 2초(LENGTH_SHORT) 뒤 데이터 삭제 처리
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                /*
+                삭제 기능
+                 */
+            }
+        }, 2000);
+
+
+        Snackbar s = Snackbar.make(view, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                /*
+                취소 기능
+                 */
+            }
+        });
+
+        View v = s.getView();
+        //v.setBackgroundColor(Color.parseColor("#F44336"));
+
+        TextView text = (TextView) v.findViewById(android.support.design.R.id.snackbar_text);
+        text.setTextColor(Color.WHITE);
+
+        TextView action = (TextView) v.findViewById(android.support.design.R.id.snackbar_action);
+        action.setTextColor(Color.WHITE);
+
+        s.show();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
