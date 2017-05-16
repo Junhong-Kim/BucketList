@@ -14,13 +14,11 @@ import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.adapter.BucketAdapter;
 import com.kimjunhong.bucketlist.common.BucketTouchHelper;
 import com.kimjunhong.bucketlist.common.SimpleDividerItemDecoration;
-import com.kimjunhong.bucketlist.item.BucketItem;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.kimjunhong.bucketlist.model.BucketList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
 
 /**
  * Created by INMA on 2017. 5. 11..
@@ -29,35 +27,41 @@ import butterknife.ButterKnife;
 public class ProcessingFragment extends Fragment {
     @BindView(R.id.processing_list) RecyclerView processingList;
     BucketAdapter adapter;
+    Realm realm;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_processing, container, false);
+
         ButterKnife.bind(this, view);
+        realm = Realm.getDefaultInstance();
 
+        initRecyclerView();
+
+        return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        realm.close();
+    }
+
+    private void initRecyclerView() {
+        // BucketList 데이터 가져오기
+        adapter = new BucketAdapter(realm.where(BucketList.class).findFirst().getBucketList());
+        // RecyclerView 설정
+        processingList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         processingList.setHasFixedSize(true);
-        LinearLayoutManager lm = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        processingList.setLayoutManager(lm);
-
-        List<BucketItem> items = new ArrayList<>();
-        BucketItem[] item = new BucketItem[5];
-
-        for(int i = 0; i < 5; i++) {
-            item[i] = new BucketItem("우주 여행", "2017년 5월 11일");
-            items.add(item[i]);
-        }
-
-        processingList.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
-        adapter = new BucketAdapter(getActivity(), items);
+        // Adapter 연결
         processingList.setAdapter(adapter);
+        // Divider 추가
+        processingList.addItemDecoration(new SimpleDividerItemDecoration(getActivity()));
 
+        // Helper 추가
         ItemTouchHelper.Callback callback = new BucketTouchHelper(adapter, processingList);
         ItemTouchHelper helper = new ItemTouchHelper(callback);
         helper.attachToRecyclerView(processingList);
-
-        adapter.notifyDataSetChanged();
-
-        return view;
     }
 }

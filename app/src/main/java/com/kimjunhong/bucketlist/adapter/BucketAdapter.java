@@ -23,25 +23,28 @@ import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.item.BucketItem;
+import com.kimjunhong.bucketlist.model.Bucket;
 
 import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.OrderedRealmCollection;
+import io.realm.RealmRecyclerViewAdapter;
 
 /**
  * Created by INMA on 2017. 5. 12..
  */
 
-public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder> {
+public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapter.ViewHolder> {
     Context context;
     List<BucketItem> items;
     Dialog dialog;
 
-    public BucketAdapter(Context context, List<BucketItem> items) {
-        this.context = context;
-        this.items = items;
+    public BucketAdapter(OrderedRealmCollection<Bucket> data) {
+        super(data, true);
+        setHasStableIds(true);
     }
 
     @Override
@@ -52,7 +55,8 @@ public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(BucketAdapter.ViewHolder holder, int position) {
-        BucketItem item = items.get(position);
+        final Bucket bucket = getItem(position);
+        holder.data = bucket;
         holder.bucketLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -95,13 +99,13 @@ public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder
             }
         });
 
-        holder.bucketTitle.setText(item.getTitle());
-        holder.bucketDate.setText(item.getDate());
+        holder.bucketTitle.setText(bucket.getTitle());
+        holder.bucketDate.setText("2017-05-16");
     }
 
     @Override
-    public int getItemCount() {
-        return this.items.size();
+    public long getItemId(int index) {
+        return getItem(index).getId();
     }
 
     public void addItem(int position) {
@@ -211,6 +215,7 @@ public class BucketAdapter extends RecyclerView.Adapter<BucketAdapter.ViewHolder
         @BindView(R.id.bucket_layout) LinearLayout bucketLayout;
         @BindView(R.id.bucket_title) TextView bucketTitle;
         @BindView(R.id.bucket_date) TextView bucketDate;
+        public Bucket data;
 
         public ViewHolder(View itemView) {
             super(itemView);
