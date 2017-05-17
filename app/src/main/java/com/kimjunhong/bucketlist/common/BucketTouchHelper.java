@@ -8,6 +8,7 @@ import android.graphics.Paint;
 import android.graphics.RectF;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 
 import com.kimjunhong.bucketlist.R;
@@ -32,7 +33,7 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
     public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         /* itemView 작업 완료 후 설정 */
         View itemView = viewHolder.itemView;
-        itemView.setBackgroundColor(Color.parseColor("#ffffff"));
+        itemView.setBackgroundColor(Color.parseColor("#FFFFFF"));
 
         super.clearView(recyclerView, viewHolder);
     }
@@ -53,14 +54,14 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
         int position = viewHolder.getAdapterPosition();
 
         if (direction == ItemTouchHelper.LEFT) {
-            // 삭제 기능
-            adapter.delete(recyclerView);
-            adapter.removeItem(position);
+            // 버킷 삭제, position은 0부터 시작하는데 sequence는 1부터 시작하므로 position + 1
+            // View가 지워지는 index랑 DB가 지워지는 index가 다름
+            adapter.delete(recyclerView, position + 1);
+            Log.v("log", "swiped position : " + position + 1);
+
         } else {
-            // 추가 기능(processing -> completed), 추가한 뒤 삭제
+            // 버킷 완료, processing -> completed
             adapter.complete(recyclerView);
-            adapter.removeItem(position);
-            adapter.addItem(position);
         }
     }
 
@@ -112,7 +113,7 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
                 // icon과 동시에 사라지게 하기 위해서 clipRect 함
                 c.clipRect(background);
 
-                //Set the image icon for Left swipe
+                // Set the image icon for Left swipe
                 RectF icon_dest = new RectF((float) itemView.getRight() - 2 * width, (float) itemView.getTop() + width, (float) itemView.getRight() - width, (float) itemView.getBottom() - width);
                 c.drawBitmap(icon, null, icon_dest, p);
             }
@@ -121,8 +122,10 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
             final float alpha = 1.0f - Math.abs(dX) / (float) viewHolder.itemView.getWidth();
             viewHolder.itemView.setAlpha(alpha);
             viewHolder.itemView.setTranslationX(dX);
+
         } else {
-            // 여기에 super.onChildDraw()를 놔두면 상,하 드래그시 부드럽게 이동 됨
+            // 상,하 드래그시 부드럽게 이동
+            // super.onChildDraw()
             // c.restore();
             super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         }

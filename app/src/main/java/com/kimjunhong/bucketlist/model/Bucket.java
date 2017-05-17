@@ -1,5 +1,7 @@
 package com.kimjunhong.bucketlist.model;
 
+import android.util.Log;
+
 import java.util.Date;
 
 import io.realm.Realm;
@@ -12,7 +14,6 @@ import io.realm.annotations.PrimaryKey;
  */
 
 public class Bucket extends RealmObject {
-
     @PrimaryKey
     private int id;
     private int sequence;
@@ -51,21 +52,26 @@ public class Bucket extends RealmObject {
         this.date = date;
     }
 
-    // Create Bucket
+    // CREATE Bucket
     public static void create(Realm realm, String title) {
         BucketList bucketList = realm.where(BucketList.class).findFirst();
         RealmList<Bucket> buckets = bucketList.getBucketList();
 
         // Primary Key Auto Increment
         Number currentId = realm.where(Bucket.class).max("id");
+        // 현재 sequence 최대 값 찾아서, 다음 sequence 값 결정
+        Number currentSequence = realm.where(Bucket.class).max("sequence");
         int nextId;
+        int nextSequence;
 
-        if(currentId == null) {
+        if(currentId == null && currentSequence == null) {
             // List가 비어있을 때
             nextId = 1;
+            nextSequence = 1;
         } else {
             // List가 비어있지 않을 때
             nextId = currentId.intValue() + 1;
+            nextSequence = currentSequence.intValue() + 1;
         }
 
         // 두번째 인자로 Primary Key Value
@@ -73,10 +79,18 @@ public class Bucket extends RealmObject {
 
         // 데이터 추가
         bucket.setDate(new Date(System.currentTimeMillis()));
-        bucket.setSequence(nextId);
+        bucket.setSequence(nextSequence);
         bucket.setTitle(title);
 
         // BucketList에 Bucket 추가
         buckets.add(bucket);
+    }
+
+    // DELETE Bucket
+    public static void delete(Realm realm, int position) {
+        Bucket bucket = realm.where(Bucket.class).equalTo("sequence", position).findFirst();
+        bucket.deleteFromRealm();
+
+        Log.v("log", "delete position : " + position);
     }
 }

@@ -12,6 +12,7 @@ import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.StyleSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,16 +23,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
-import com.kimjunhong.bucketlist.item.BucketItem;
 import com.kimjunhong.bucketlist.model.Bucket;
 
 import java.util.Collections;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedRealmCollection;
+import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmRecyclerViewAdapter;
+import io.realm.RealmResults;
 
 /**
  * Created by INMA on 2017. 5. 12..
@@ -39,8 +41,9 @@ import io.realm.RealmRecyclerViewAdapter;
 
 public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapter.ViewHolder> {
     Context context;
-    List<BucketItem> items;
+    RealmList<Bucket> items;
     Dialog dialog;
+    Realm realm;
 
     public BucketAdapter(OrderedRealmCollection<Bucket> data) {
         super(data, true);
@@ -100,7 +103,8 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         });
 
         holder.bucketTitle.setText(bucket.getTitle());
-        holder.bucketDate.setText("2017-05-16");
+        // TODO: 날짜 형식
+        holder.bucketDate.setText(bucket.getDate().toString());
     }
 
     @Override
@@ -108,22 +112,44 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         return getItem(index).getId();
     }
 
+    // 버킷 완료
     public void addItem(int position) {
-        items.add(new BucketItem("New Title", "New Date"));
-        notifyItemInserted(items.size());
+        // items.add(new BucketItem("New Title", "New Date"));
+        // notifyItemInserted(items.size());
     }
 
-    public void removeItem(int position) {
-        items.remove(position);
-        notifyItemRemoved(position);
-        notifyItemRangeChanged(position, items.size());
+    // 버킷 삭제
+    public void deleteBucket(final int position) {
+        realm = Realm.getDefaultInstance();
+        try {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    Log.v("log", "execute position: " + position);
+                    Bucket.delete(realm, position);
+
+                    // 지운 위치의 뒷 순서 버킷 sequence 값을 -1 씩해서 업데이트
+                    RealmResults<Bucket> results = realm.where(Bucket.class)
+                            .greaterThan("sequence", position)
+                            .findAll();
+                    for (Bucket bucket : results) {
+                        bucket.setSequence(bucket.getSequence() - 1);
+                    }
+                }
+            });
+        } finally {
+            realm.close();
+        }
     }
 
+    // 버킷 스왑
     public void swapItem(int fromPosition, int toPosition) {
+        // TODO: 버킷 스왑
         Collections.swap(items, fromPosition, toPosition);
         notifyItemMoved(fromPosition, toPosition);
     }
 
+    // 버킷 완료 & 취소 Snackbar
     public void complete(RecyclerView recyclerView) {
         // Snackbar 텍스트 설정
         SpannableStringBuilder spanText = new SpannableStringBuilder();
@@ -140,18 +166,14 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                /*
-                완료 기능
-                */
+                // TODO: 버킷 완료
             }
         }, 2000);
 
         Snackbar s = Snackbar.make(recyclerView, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                취소 기능
-                 */
+                // TODO: 버킷 완료 취소
             }
         });
 
@@ -167,7 +189,8 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         s.show();
     }
 
-    public void delete(View view) {
+    // 버킷 삭제 & 취소 Snackbar
+    public void delete(View view, final int position) {
         // Snackbar 텍스트 설정
         SpannableStringBuilder spanText = new SpannableStringBuilder();
         spanText.append("버킷을 ");
@@ -180,22 +203,26 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         spanText.append(" 했습니다");
 
         // 2초(LENGTH_SHORT) 뒤 데이터 삭제 처리
-        new Handler().postDelayed(new Runnable() {
+        final Handler mHandler = new Handler();
+        final Runnable mRunnable = new Runnable() {
             @Override
             public void run() {
-                /*
-                삭제 기능
-                 */
+                // 버킷 삭제
+                deleteBucket(position);
             }
-        }, 2000);
-
+        };
 
         Snackbar s = Snackbar.make(view, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                /*
-                취소 기능
-                 */
+                // 버킷 삭제 취소
+                mHandler.removeCallbacks(mRunnable);
+
+                // position이 final 변수이기 때문에 새로운 변수에서 값을 재정의
+                // View 상태를 변경할 것인데 position 값으로 sequence 값이 들어왔기 때문에 -1
+                int cancelPosition = position - 1;
+                notifyItemChanged(cancelPosition);
+                Log.v("log", "cancel position : " + cancelPosition);
             }
         });
 
@@ -208,6 +235,7 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         TextView action = (TextView) v.findViewById(android.support.design.R.id.snackbar_action);
         action.setTextColor(Color.WHITE);
 
+        mHandler.postDelayed(mRunnable, 2000);
         s.show();
     }
 
