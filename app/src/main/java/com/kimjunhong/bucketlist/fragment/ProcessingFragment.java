@@ -19,6 +19,7 @@ import com.kimjunhong.bucketlist.model.BucketList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.Realm;
+import io.realm.Sort;
 
 /**
  * Created by INMA on 2017. 5. 11..
@@ -49,8 +50,8 @@ public class ProcessingFragment extends Fragment {
     }
 
     private void initRecyclerView() {
-        // BucketList 데이터 가져오기
-        adapter = new BucketAdapter(realm.where(BucketList.class).findFirst().getBucketList());
+        // BucketList sequence 오름차순으로 데이터 가져오기
+        adapter = new BucketAdapter(realm.where(BucketList.class).findFirst().getBucketList().sort("sequence", Sort.ASCENDING));
         // RecyclerView 설정
         processingList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         processingList.setHasFixedSize(true);

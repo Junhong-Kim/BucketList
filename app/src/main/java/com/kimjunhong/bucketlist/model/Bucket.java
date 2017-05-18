@@ -88,9 +88,20 @@ public class Bucket extends RealmObject {
 
     // DELETE Bucket
     public static void delete(Realm realm, int position) {
-        Bucket bucket = realm.where(Bucket.class).equalTo("sequence", position).findFirst();
-        bucket.deleteFromRealm();
+        Bucket bucket = realm.where(Bucket.class) .equalTo("sequence", position).findFirst();
 
-        Log.v("log", "delete position : " + position);
+        bucket.deleteFromRealm();
+        Log.v("log", "deleteBucket position : " + position);
+    }
+
+    // SWAP Bucket
+    public static void swap(Realm realm, int fromPosition, int toPosition) {
+        // position에 해당하는 버킷을 가져옴, sequence 값은 항상 position + 1
+        Bucket fromBucket = realm.where(Bucket.class).equalTo("sequence", fromPosition + 1).findFirst();
+        Bucket toBucket = realm.where(Bucket.class).equalTo("sequence", toPosition + 1).findFirst();
+
+        // 버킷 스왑
+        fromBucket.setSequence(toPosition + 1);
+        toBucket.setSequence(fromPosition + 1);
     }
 }

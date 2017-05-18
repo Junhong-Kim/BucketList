@@ -44,7 +44,7 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
         View itemView = viewHolder.itemView;
         itemView.setBackgroundColor(Color.parseColor("#EEEEEE"));
 
-        adapter.swapItem(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+        adapter.swapBucket(viewHolder.getAdapterPosition(), target.getAdapterPosition());
         return false;
     }
 
@@ -56,7 +56,7 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
         if (direction == ItemTouchHelper.LEFT) {
             // 버킷 삭제, position은 0부터 시작하는데 sequence는 1부터 시작하므로 position + 1
             // View가 지워지는 index랑 DB가 지워지는 index가 다름
-            adapter.delete(recyclerView, position + 1);
+            adapter.deleteBucket(recyclerView, position + 1);
             Log.v("log", "swiped position : " + position + 1);
 
         } else {

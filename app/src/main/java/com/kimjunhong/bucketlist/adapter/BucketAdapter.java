@@ -25,13 +25,10 @@ import android.widget.Toast;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.model.Bucket;
 
-import java.util.Collections;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
 
@@ -41,7 +38,6 @@ import io.realm.RealmResults;
 
 public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapter.ViewHolder> {
     Context context;
-    RealmList<Bucket> items;
     Dialog dialog;
     Realm realm;
 
@@ -112,43 +108,6 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         return getItem(index).getId();
     }
 
-    // 버킷 완료
-    public void addItem(int position) {
-        // items.add(new BucketItem("New Title", "New Date"));
-        // notifyItemInserted(items.size());
-    }
-
-    // 버킷 삭제
-    public void deleteBucket(final int position) {
-        realm = Realm.getDefaultInstance();
-        try {
-            realm.executeTransaction(new Realm.Transaction() {
-                @Override
-                public void execute(Realm realm) {
-                    Log.v("log", "execute position: " + position);
-                    Bucket.delete(realm, position);
-
-                    // 지운 위치의 뒷 순서 버킷 sequence 값을 -1 씩해서 업데이트
-                    RealmResults<Bucket> results = realm.where(Bucket.class)
-                            .greaterThan("sequence", position)
-                            .findAll();
-                    for (Bucket bucket : results) {
-                        bucket.setSequence(bucket.getSequence() - 1);
-                    }
-                }
-            });
-        } finally {
-            realm.close();
-        }
-    }
-
-    // 버킷 스왑
-    public void swapItem(int fromPosition, int toPosition) {
-        // TODO: 버킷 스왑
-        Collections.swap(items, fromPosition, toPosition);
-        notifyItemMoved(fromPosition, toPosition);
-    }
-
     // 버킷 완료 & 취소 Snackbar
     public void complete(RecyclerView recyclerView) {
         // Snackbar 텍스트 설정
@@ -190,7 +149,7 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
     }
 
     // 버킷 삭제 & 취소 Snackbar
-    public void delete(View view, final int position) {
+    public void deleteBucket(View view, final int position) {
         // Snackbar 텍스트 설정
         SpannableStringBuilder spanText = new SpannableStringBuilder();
         spanText.append("버킷을 ");
@@ -208,7 +167,26 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
             @Override
             public void run() {
                 // 버킷 삭제
-                deleteBucket(position);
+                realm = Realm.getDefaultInstance();
+                try {
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Log.v("log", "execute position: " + position);
+                            Bucket.delete(realm, position);
+
+                            // 지운 위치의 뒷 순서 버킷 sequence 값을 -1 씩해서 업데이트
+                            RealmResults<Bucket> results = realm.where(Bucket.class)
+                                    .greaterThan("sequence", position)
+                                    .findAll();
+                            for (Bucket bucket : results) {
+                                bucket.setSequence(bucket.getSequence() - 1);
+                            }
+                        }
+                    });
+                } finally {
+                    realm.close();
+                }
             }
         };
 
@@ -237,6 +215,21 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
 
         mHandler.postDelayed(mRunnable, 2000);
         s.show();
+    }
+
+    // 버킷 스왑
+    public void swapBucket(final int fromPosition, final int toPosition) {
+        realm = Realm.getDefaultInstance();
+        try {
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    Bucket.swap(realm, fromPosition, toPosition);
+                }
+            });
+        } finally {
+            realm.close();
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
