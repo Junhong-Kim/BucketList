@@ -53,16 +53,17 @@ public class BucketTouchHelper extends ItemTouchHelper.SimpleCallback {
         /* itemView SWIPE */
         int position = viewHolder.getAdapterPosition();
 
+        // position은 0부터 시작하는데 sequence는 1부터 시작하므로 position + 1
+        // View가 지워지는 index랑 DB가 지워지는 index가 다름
         if (direction == ItemTouchHelper.LEFT) {
-            // 버킷 삭제, position은 0부터 시작하는데 sequence는 1부터 시작하므로 position + 1
-            // View가 지워지는 index랑 DB가 지워지는 index가 다름
+            // 버킷 삭제
             adapter.deleteBucket(recyclerView, position + 1);
-            Log.v("log", "swiped position : " + position + 1);
-
         } else {
             // 버킷 완료, processing -> completed
-            adapter.complete(recyclerView);
+            adapter.completeBucket(recyclerView, position + 1);
         }
+
+        Log.v("log", "swiped position : " + position + 1);
     }
 
     @Override

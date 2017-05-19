@@ -109,7 +109,7 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
     }
 
     // 버킷 완료 & 취소 Snackbar
-    public void complete(RecyclerView recyclerView) {
+    public void completeBucket(RecyclerView recyclerView, final int position) {
         // Snackbar 텍스트 설정
         SpannableStringBuilder spanText = new SpannableStringBuilder();
         spanText.append("버킷을 ");
@@ -122,17 +122,38 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         spanText.append(" 했습니다");
 
         // 2초(LENGTH_SHORT) 뒤 완료 처리
-        new Handler().postDelayed(new Runnable() {
+        final Handler mHandler = new Handler();
+        final Runnable mRunnable = new Runnable() {
             @Override
             public void run() {
-                // TODO: 버킷 완료
+                // 버킷 완료
+                realm = Realm.getDefaultInstance();
+                try {
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            Bucket.complete(realm, position);
+
+                            // 완료 위치의 뒷 순서 버킷 sequence 값을 -1 씩해서 업데이트
+                            RealmResults<Bucket> results = realm.where(Bucket.class)
+                                                                .greaterThan("sequence", position)
+                                                                .findAll();
+                            for (Bucket bucket : results) {
+                                bucket.setSequence(bucket.getSequence() - 1);
+                            }
+                        }
+                    });
+                } finally {
+                    realm.close();
+                }
             }
-        }, 2000);
+        };
 
         Snackbar s = Snackbar.make(recyclerView, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: 버킷 완료 취소
+                // 버킷 완료 취소
+                cancelAction(mHandler, mRunnable, position);
             }
         });
 
@@ -145,11 +166,12 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         TextView action = (TextView) v.findViewById(android.support.design.R.id.snackbar_action);
         action.setTextColor(Color.WHITE);
 
+        mHandler.postDelayed(mRunnable, 2000);
         s.show();
     }
 
     // 버킷 삭제 & 취소 Snackbar
-    public void deleteBucket(View view, final int position) {
+    public void deleteBucket(RecyclerView recyclerView, final int position) {
         // Snackbar 텍스트 설정
         SpannableStringBuilder spanText = new SpannableStringBuilder();
         spanText.append("버킷을 ");
@@ -190,17 +212,11 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
             }
         };
 
-        Snackbar s = Snackbar.make(view, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
+        Snackbar s = Snackbar.make(recyclerView, spanText, Snackbar.LENGTH_SHORT).setAction("취소", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // 버킷 삭제 취소
-                mHandler.removeCallbacks(mRunnable);
-
-                // position이 final 변수이기 때문에 새로운 변수에서 값을 재정의
-                // View 상태를 변경할 것인데 position 값으로 sequence 값이 들어왔기 때문에 -1
-                int cancelPosition = position - 1;
-                notifyItemChanged(cancelPosition);
-                Log.v("log", "cancel position : " + cancelPosition);
+                cancelAction(mHandler, mRunnable, position);
             }
         });
 
@@ -230,6 +246,17 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         } finally {
             realm.close();
         }
+    }
+
+    // 버킷 취소
+    private void cancelAction(Handler handler, Runnable runnable, int position) {
+        // position이 final 변수이기 때문에 새로운 변수에서 값을 재정의
+        // View 상태를 변경해야 하는데 position 값으로 sequence 값이 들어왔기 때문에 position - 1
+        handler.removeCallbacks(runnable);
+        int cancelPosition = position - 1;
+
+        notifyItemChanged(cancelPosition);
+        Log.v("log", "cancel position : " + cancelPosition);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -3,6 +3,7 @@ package com.kimjunhong.bucketlist;
 import android.app.Application;
 
 import com.kimjunhong.bucketlist.model.BucketList;
+import com.kimjunhong.bucketlist.model.CompletedBucketList;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -22,6 +23,7 @@ public class MyApplication extends Application{
                     @Override
                     public void execute(Realm realm) {
                         realm.createObject(BucketList.class);
+                        realm.createObject(CompletedBucketList.class);
                     }})
                 .build();
 

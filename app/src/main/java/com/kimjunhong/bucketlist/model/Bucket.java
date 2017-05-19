@@ -78,9 +78,9 @@ public class Bucket extends RealmObject {
         Bucket bucket = realm.createObject(Bucket.class, nextId);
 
         // 데이터 추가
-        bucket.setDate(new Date(System.currentTimeMillis()));
         bucket.setSequence(nextSequence);
         bucket.setTitle(title);
+        bucket.setDate(new Date(System.currentTimeMillis()));
 
         // BucketList에 Bucket 추가
         buckets.add(bucket);
@@ -88,7 +88,7 @@ public class Bucket extends RealmObject {
 
     // DELETE Bucket
     public static void delete(Realm realm, int position) {
-        Bucket bucket = realm.where(Bucket.class) .equalTo("sequence", position).findFirst();
+        Bucket bucket = realm.where(Bucket.class).equalTo("sequence", position).findFirst();
 
         bucket.deleteFromRealm();
         Log.v("log", "deleteBucket position : " + position);
@@ -103,5 +103,16 @@ public class Bucket extends RealmObject {
         // 버킷 스왑
         fromBucket.setSequence(toPosition + 1);
         toBucket.setSequence(fromPosition + 1);
+    }
+
+    // COMPLETE Bucket
+    public static void complete(Realm realm, int position) {
+        // 완료한 버킷의 title을 CompletedBucket.create 매개변수로 넘겨준다
+        Bucket bucket = realm.where(Bucket.class).equalTo("sequence", position).findFirst();
+        String completedTitle = bucket.getTitle();
+
+        // 완료한 버킷 리스트에 항목을 추가하고 진행중 버킷 리스트에서 항목을 삭제한다
+        CompletedBucket.create(realm, completedTitle);
+        Bucket.delete(realm, position);
     }
 }

@@ -19,25 +19,24 @@ import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.activity.DetailActivity;
-import com.kimjunhong.bucketlist.item.CompletedBucketItem;
-
-import java.util.List;
+import com.kimjunhong.bucketlist.model.CompletedBucket;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.OrderedRealmCollection;
+import io.realm.RealmRecyclerViewAdapter;
 
 /**
  * Created by INMA on 2017. 5. 13..
  */
 
-public class CompletedBucketAdapter extends RecyclerView.Adapter<CompletedBucketAdapter.ViewHolder> {
+public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBucket, CompletedBucketAdapter.ViewHolder> {
     Context context;
-    List<CompletedBucketItem> items;
     Dialog dialog;
 
-    public CompletedBucketAdapter(Context context, List<CompletedBucketItem> items) {
-        this.context = context;
-        this.items = items;
+    public CompletedBucketAdapter(OrderedRealmCollection<CompletedBucket> data) {
+        super(data, true);
+        setHasStableIds(true);
     }
 
     @Override
@@ -48,14 +47,16 @@ public class CompletedBucketAdapter extends RecyclerView.Adapter<CompletedBucket
 
     @Override
     public void onBindViewHolder(CompletedBucketAdapter.ViewHolder holder, int position) {
-        CompletedBucketItem item = items.get(position);
-        holder.layout.setOnClickListener(new View.OnClickListener() {
+        CompletedBucket completedBucket = getItem(position);
+        holder.data = completedBucket;
+        holder.completedBucketLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // TODO: 버킷 상세 정보 가져오기
                 context.startActivity(new Intent(context, DetailActivity.class));
             }
         });
-        holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.completedBucketLayout.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View view) {
                 // 다이얼로그 생성
@@ -97,25 +98,28 @@ public class CompletedBucketAdapter extends RecyclerView.Adapter<CompletedBucket
                 return true;
             }
         });
-        holder.title.setText(item.getTitle());
-        holder.with.setText(item.getWith());
-        holder.date.setText(item.getDate());
-        holder.location.setText(item.getLocation());
+        holder.title.setText(completedBucket.getTitle());
+        // TODO: with 값이 없을 경우
+        holder.with.setText(completedBucket.getWith());
+        // TODO: 날짜 형식
+        holder.date.setText(completedBucket.getDate().toString());
+        holder.location.setText(completedBucket.getLocation());
         holder.picture.setImageResource(R.drawable.icon_picture);
     }
 
     @Override
-    public int getItemCount() {
-        return this.items.size();
+    public long getItemId(int index) {
+        return  getItem(index).getId();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.completed_bucket_layout) LinearLayout layout;
+        @BindView(R.id.completed_bucket_layout) LinearLayout completedBucketLayout;
         @BindView(R.id.completed_bucket_title) TextView title;
         @BindView(R.id.completed_bucket_with) TextView with;
         @BindView(R.id.completed_bucket_date) TextView date;
         @BindView(R.id.completed_bucket_location) TextView location;
         @BindView(R.id.completed_bucket_picture) ImageView picture;
+        public CompletedBucket data;
 
         public ViewHolder(View itemView) {
             super(itemView);
