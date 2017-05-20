@@ -88,31 +88,42 @@ public class Bucket extends RealmObject {
 
     // DELETE Bucket
     public static void delete(Realm realm, int position) {
-        Bucket bucket = realm.where(Bucket.class).equalTo("sequence", position).findFirst();
-
-        bucket.deleteFromRealm();
         Log.v("log", "deleteBucket position : " + position);
+        Bucket bucket = findOne(realm, position);
+        bucket.deleteFromRealm();
+    }
+
+    // UPDATE Bucket
+    public static void update(Realm realm, String title, int position) {
+        Log.v("log", "updateBucket position : " + position);
+        Bucket bucket = findOne(realm, position);
+        bucket.setTitle(title);
     }
 
     // SWAP Bucket
     public static void swap(Realm realm, int fromPosition, int toPosition) {
-        // position에 해당하는 버킷을 가져옴, sequence 값은 항상 position + 1
-        Bucket fromBucket = realm.where(Bucket.class).equalTo("sequence", fromPosition + 1).findFirst();
-        Bucket toBucket = realm.where(Bucket.class).equalTo("sequence", toPosition + 1).findFirst();
+        // position에 해당하는 버킷을 가져옴
+        Bucket fromBucket = findOne(realm, fromPosition);
+        Bucket toBucket = findOne(realm, toPosition);
 
         // 버킷 스왑
-        fromBucket.setSequence(toPosition + 1);
-        toBucket.setSequence(fromPosition + 1);
+        fromBucket.setSequence(toPosition);
+        toBucket.setSequence(fromPosition);
     }
 
     // COMPLETE Bucket
     public static void complete(Realm realm, int position) {
         // 완료한 버킷의 title을 CompletedBucket.create 매개변수로 넘겨준다
-        Bucket bucket = realm.where(Bucket.class).equalTo("sequence", position).findFirst();
+        Bucket bucket = findOne(realm, position);
         String completedTitle = bucket.getTitle();
 
         // 완료한 버킷 리스트에 항목을 추가하고 진행중 버킷 리스트에서 항목을 삭제한다
         CompletedBucket.create(realm, completedTitle);
         Bucket.delete(realm, position);
+    }
+
+    // FIND Bucket
+    private static Bucket findOne(Realm realm, int position) {
+        return realm.where(Bucket.class).equalTo("sequence", position).findFirst();
     }
 }

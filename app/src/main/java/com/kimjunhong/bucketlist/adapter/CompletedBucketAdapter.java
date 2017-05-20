@@ -24,7 +24,9 @@ import com.kimjunhong.bucketlist.model.CompletedBucket;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedRealmCollection;
+import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
+import io.realm.RealmResults;
 
 /**
  * Created by INMA on 2017. 5. 13..
@@ -33,10 +35,12 @@ import io.realm.RealmRecyclerViewAdapter;
 public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBucket, CompletedBucketAdapter.ViewHolder> {
     Context context;
     Dialog dialog;
+    Realm realm;
 
-    public CompletedBucketAdapter(OrderedRealmCollection<CompletedBucket> data) {
+    public CompletedBucketAdapter(Context context, OrderedRealmCollection<CompletedBucket> data) {
         super(data, true);
         setHasStableIds(true);
+        this.context = context;
     }
 
     @Override
@@ -46,14 +50,24 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
     }
 
     @Override
-    public void onBindViewHolder(CompletedBucketAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(CompletedBucketAdapter.ViewHolder holder, final int position) {
         CompletedBucket completedBucket = getItem(position);
         holder.data = completedBucket;
         holder.completedBucketLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO: 버킷 상세 정보 가져오기
-                context.startActivity(new Intent(context, DetailActivity.class));
+                try {
+                    realm = Realm.getDefaultInstance();
+                    realm.executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            // TODO: completedBucket 데이터 detailActivity로 넘기기
+                            context.startActivity(new Intent(context, DetailActivity.class));
+                        }
+                    });
+                } finally {
+                    realm.close();
+                }
             }
         });
         holder.completedBucketLayout.setOnLongClickListener(new View.OnLongClickListener() {
@@ -84,8 +98,30 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
                 customLayout.findViewById(R.id.dialog_button_delete).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Toast.makeText(context, "삭제 되었습니다 :'(", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
+                        try {
+                            realm = Realm.getDefaultInstance();
+                            realm.executeTransaction(new Realm.Transaction() {
+                                @Override
+                                public void execute(Realm realm) {
+                                    // sequence 값으로 position 값이 들어왔기 때문에 position + 1
+                                    int deletePosition = position + 1;
+                                    CompletedBucket.delete(realm, deletePosition);
+
+                                    // 지운 위치의 뒷 순서 버킷 sequence 값을 -1 씩해서 업데이트
+                                    RealmResults<CompletedBucket> results = realm.where(CompletedBucket.class)
+                                                                                 .greaterThan("sequence", position)
+                                                                                 .findAll();
+                                    for (CompletedBucket completedBucket : results) {
+                                        completedBucket.setSequence(completedBucket.getSequence() - 1);
+                                    }
+
+                                    Toast.makeText(context, "삭제 되었습니다 :'(", Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        } finally {
+                            dialog.dismiss();
+                            realm.close();
+                        }
                     }
                 });
                 customLayout.findViewById(R.id.dialog_button_delete_cancel).setOnClickListener(new View.OnClickListener() {

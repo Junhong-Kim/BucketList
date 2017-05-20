@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,9 +42,10 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
     Dialog dialog;
     Realm realm;
 
-    public BucketAdapter(OrderedRealmCollection<Bucket> data) {
+    public BucketAdapter(Context context, OrderedRealmCollection<Bucket> data) {
         super(data, true);
         setHasStableIds(true);
+        this.context = context;
     }
 
     @Override
@@ -53,16 +55,16 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
     }
 
     @Override
-    public void onBindViewHolder(BucketAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(BucketAdapter.ViewHolder holder, final int position) {
         final Bucket bucket = getItem(position);
         holder.data = bucket;
         holder.bucketLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 // 다이얼로그 생성
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 // 커스텀 다이얼로그 가져오기
-                View customLayout = View.inflate(context, R.layout.dialog_edit,null);
+                final View customLayout = View.inflate(context, R.layout.dialog_edit, null);
                 // 빌더에 다이얼로그 적용
                 builder.setView(customLayout);
 
@@ -84,8 +86,28 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
                 customLayout.findViewById(R.id.dialog_button_edit).setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Toast.makeText(context, "수정 되었습니다 :')", Toast.LENGTH_SHORT).show();
-                        dialog.dismiss();
+                        try {
+                            realm = Realm.getDefaultInstance();
+                            final EditText title = (EditText) customLayout.findViewById(R.id.editText_title);
+
+                            if(title.getText().toString().equals("")) {
+                                Toast.makeText(context, "버킷을 입력해주세요!", Toast.LENGTH_SHORT).show();
+                            } else {
+                                realm.executeTransaction(new Realm.Transaction() {
+                                    @Override
+                                    public void execute(Realm realm) {
+                                        // sequence 값으로 position 값이 들어왔기 때문에 position + 1
+                                        int updatePosition = position + 1;
+                                        Bucket.update(realm, title.getText().toString(), updatePosition);
+
+                                        Toast.makeText(context, "수정 되었습니다 :')", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } finally {
+                            dialog.dismiss();
+                            realm.close();
+                        }
                     }
                 });
                 customLayout.findViewById(R.id.dialog_button_edit_cancel).setOnClickListener(new View.OnClickListener() {
@@ -240,7 +262,8 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
             realm.executeTransaction(new Realm.Transaction() {
                 @Override
                 public void execute(Realm realm) {
-                    Bucket.swap(realm, fromPosition, toPosition);
+                    // sequence 값은 항상 position + 1
+                    Bucket.swap(realm, fromPosition + 1, toPosition + 1);
                 }
             });
         } finally {

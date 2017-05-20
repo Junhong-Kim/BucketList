@@ -139,7 +139,10 @@ public class DetailActivity extends AppCompatActivity {
 
             case R.id.edit:
                 if (editFlag) {
+                    // TODO: CompletedBucket UPDATE
                     bucketData(false);
+                    Toast.makeText(getApplicationContext(), "수정 되었습니다", Toast.LENGTH_SHORT).show();
+
                 } else {
                     bucketData(true);
                 }

@@ -125,4 +125,14 @@ public class CompletedBucket extends RealmObject {
         // CompletedBucketList에 CompletedBucket 추가
         completedBuckets.add(completedBucket);
     }
+
+    // DELETE Completed Bucket
+    public static void delete(Realm realm, int position) {
+        findOne(realm, position).deleteFromRealm();
+    }
+
+    // FIND Bucket
+    private static CompletedBucket findOne(Realm realm, int position) {
+        return realm.where(CompletedBucket.class).equalTo("sequence", position).findFirst();
+    }
 }

@@ -48,7 +48,7 @@ public class CompletedFragment extends Fragment {
     }
 
     private void initRecyclerView() {
-        adapter = new CompletedBucketAdapter(realm.where(CompletedBucketList.class).findFirst().getCompletedBucketList().sort("sequence", Sort.ASCENDING));
+        adapter = new CompletedBucketAdapter(getActivity(), realm.where(CompletedBucketList.class).findFirst().getCompletedBucketList().sort("sequence", Sort.ASCENDING));
         completedList.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false));
         completedList.setHasFixedSize(true);
         completedList.setAdapter(adapter);
