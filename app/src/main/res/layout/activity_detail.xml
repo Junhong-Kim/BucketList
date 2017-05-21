@@ -7,6 +7,7 @@
     <include layout="@layout/layout_toolbar" />
 
     <TextView
+        android:id="@+id/textView_title"
         style="@style/LargeFont"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -102,7 +103,7 @@
                 android:src="@drawable/icon_diary" />
 
             <EditText
-                android:id="@+id/editText_diary"
+                android:id="@+id/editText_memo"
                 style="@style/MediumFont"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

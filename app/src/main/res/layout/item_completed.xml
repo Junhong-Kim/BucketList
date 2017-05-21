@@ -34,7 +34,7 @@
                     style="@style/MediumFont"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="번지점프"
+                    android:text="버킷"
                     android:textStyle="bold" />
 
                 <TextView
@@ -44,6 +44,7 @@
                     android:text="을/를 했습니다" />
 
                 <TextView
+                    android:id="@+id/completed_bucket_hyphen"
                     style="@style/MediumFont"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -54,14 +55,15 @@
                     style="@style/MediumFont"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="여자친구"
+                    android:text="누구"
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/completed_bucket_with_sub"
                     style="@style/MediumFont"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="랑 함께" />
+                    android:text="(이)랑 함께" />
             </LinearLayout>
 
             <LinearLayout
@@ -87,7 +89,7 @@
                     style="@style/SmallFont"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="서울"
+                    android:text="어딘가"
                     android:textColor="@color/colorSub" />
             </LinearLayout>
         </LinearLayout>

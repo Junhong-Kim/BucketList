@@ -47,7 +47,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         ButterKnife.bind(this);
-        realm = Realm.getDefaultInstance();
 
         setSupportActionBar(toolbar);
 //        ActionBar actionBar = getSupportActionBar();
@@ -67,12 +66,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // 기본 타이틀 제거
         this.setTitle(null);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        realm.close();
     }
 
     private void initViewPager() {
@@ -124,17 +117,22 @@ public class MainActivity extends AppCompatActivity {
                 if(newBucket.getText().toString().equals("")) {
                     Toast.makeText(MainActivity.this, "버킷을 입력해주세요", Toast.LENGTH_SHORT).show();
                 } else {
-                    realm.executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            // 말풍선 보이기
-                            showSpeechBubble();
-                            // Bucket 생성
-                            Bucket.create(realm, String.valueOf(newBucket.getText()));
-                            // EditText 초기화
-                            newBucket.setText("");
-                        }
-                    });
+                    try {
+                        realm = Realm.getDefaultInstance();
+                        realm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                // 말풍선 보이기
+                                showSpeechBubble();
+                                // Bucket 생성
+                                Bucket.create(realm, String.valueOf(newBucket.getText()));
+                                // EditText 초기화
+                                newBucket.setText("");
+                            }
+                        });
+                    } finally {
+                        realm.close();
+                    }
                 }
             }
         });

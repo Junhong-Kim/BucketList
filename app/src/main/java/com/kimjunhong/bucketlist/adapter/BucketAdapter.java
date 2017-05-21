@@ -26,6 +26,8 @@ import android.widget.Toast;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.model.Bucket;
 
+import java.text.SimpleDateFormat;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedRealmCollection;
@@ -121,8 +123,9 @@ public class BucketAdapter extends RealmRecyclerViewAdapter<Bucket, BucketAdapte
         });
 
         holder.bucketTitle.setText(bucket.getTitle());
-        // TODO: 날짜 형식
-        holder.bucketDate.setText(bucket.getDate().toString());
+        // 날짜 형식 (Date -> String)
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일");
+        holder.bucketDate.setText(sdf.format(bucket.getDate()));
     }
 
     @Override

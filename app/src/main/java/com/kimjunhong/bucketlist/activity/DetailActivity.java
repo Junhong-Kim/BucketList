@@ -29,12 +29,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
+import com.kimjunhong.bucketlist.model.CompletedBucket;
 
 import java.io.File;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
 
 /**
  * Created by INMA on 2017. 5. 12..
@@ -42,10 +46,11 @@ import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
+    @BindView(R.id.textView_title) TextView title;
     @BindView(R.id.textView_date) TextView date;
     @BindView(R.id.editText_location) EditText location;
     @BindView(R.id.editText_with) EditText with;
-    @BindView(R.id.editText_diary) EditText diary;
+    @BindView(R.id.editText_memo) EditText memo;
     @BindView(R.id.imageView_picture) ImageView picture;
 
     boolean editFlag = true;
@@ -54,6 +59,8 @@ public class DetailActivity extends AppCompatActivity {
     static String SAMPLE_IMAGE = "ic_launcher.png";
 
     Dialog dialog;
+    Realm realm;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +73,7 @@ public class DetailActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.icon_back);
 
+        initView();
         initDatePicker();
 
         picture.setOnClickListener(new View.OnClickListener() {
@@ -117,6 +125,12 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        realm.close();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.detail, menu);
         return true;
@@ -125,6 +139,7 @@ public class DetailActivity extends AppCompatActivity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
             finish();
         }
         return super.onKeyDown(keyCode, event);
@@ -134,15 +149,43 @@ public class DetailActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
                 return true;
 
             case R.id.edit:
                 if (editFlag) {
-                    // TODO: CompletedBucket UPDATE
-                    bucketData(false);
-                    Toast.makeText(getApplicationContext(), "수정 되었습니다", Toast.LENGTH_SHORT).show();
+                    // 완료한 버킷 수정
+                    try {
+                        realm = Realm.getDefaultInstance();
+                        realm.executeTransaction(new Realm.Transaction() {
+                            @Override
+                            public void execute(Realm realm) {
+                                try {
+                                    CompletedBucket completedBucket = new CompletedBucket();
 
+                                    completedBucket.setTitle(title.getText().toString());
+                                    // 날짜 형식 (String -> Date)
+                                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일");
+                                    completedBucket.setDate(sdf.parse(date.getText().toString()));
+                                    completedBucket.setLocation(location.getText().toString());
+                                    completedBucket.setWith(with.getText().toString());
+                                    completedBucket.setMemo(memo.getText().toString());
+                                    // TODO: 이미지 정보 가져오기
+                                    completedBucket.setPicture(R.drawable.icon_picture);
+
+                                    CompletedBucket.update(realm, completedBucket);
+                                    Toast.makeText(getApplicationContext(), "수정 되었습니다", Toast.LENGTH_SHORT).show();
+                                } catch (ParseException e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getApplicationContext(), "에러", Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        });
+                    } finally {
+                        realm.close();
+                        bucketData(false);
+                    }
                 } else {
                     bucketData(true);
                 }
@@ -155,11 +198,44 @@ public class DetailActivity extends AppCompatActivity {
         }
     }
 
+    private void initView() {
+        try {
+            realm = Realm.getDefaultInstance();
+            realm.executeTransaction(new Realm.Transaction() {
+                @Override
+                public void execute(Realm realm) {
+                    Intent intent = getIntent();
+                    int id = intent.getIntExtra("id", 0);
+                    CompletedBucket completedBucket = realm.where(CompletedBucket.class).equalTo("id", id).findFirst();
+
+                    title.setText(completedBucket.getTitle());
+                    // 날짜 형식 (Date -> String)
+                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일");
+                    date.setText(sdf.format(completedBucket.getDate()));
+
+                    if(location.getText().equals("어딘가")) {
+                        // location 값이 없을 경우
+                        location.setText("");
+                    } else {
+                        // location 값이 있을 경우
+                        location.setText(completedBucket.getLocation());
+                    }
+
+                    with.setText(completedBucket.getWith());
+                    memo.setText(completedBucket.getMemo());
+                    picture.setImageDrawable(getResources().getDrawable(R.drawable.icon_picture));
+                }
+            });
+        } finally {
+            realm.close();
+        }
+    }
+
     private void bucketData(boolean flag) {
         date.setEnabled(flag);
         location.setEnabled(flag);
         with.setEnabled(flag);
-        diary.setEnabled(flag);
+        memo.setEnabled(flag);
         picture.setEnabled(flag);
     }
 

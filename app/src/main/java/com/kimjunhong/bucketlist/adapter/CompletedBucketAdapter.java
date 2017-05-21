@@ -19,7 +19,10 @@ import android.widget.Toast;
 
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.activity.DetailActivity;
+import com.kimjunhong.bucketlist.activity.MainActivity;
 import com.kimjunhong.bucketlist.model.CompletedBucket;
+
+import java.text.SimpleDateFormat;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -61,8 +64,13 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
                     realm.executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
-                            // TODO: completedBucket 데이터 detailActivity로 넘기기
-                            context.startActivity(new Intent(context, DetailActivity.class));
+                            // completedBucket 데이터 detailActivity로 넘기기
+                            Intent intent = new Intent(context, DetailActivity.class);
+                            CompletedBucket completedBucket = CompletedBucket.findOne(realm, position + 1);
+                            intent.putExtra("id", completedBucket.getId());
+
+                            context.startActivity(intent);
+                            ((MainActivity)context).finish();
                         }
                     });
                 } finally {
@@ -134,12 +142,24 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
                 return true;
             }
         });
+
         holder.title.setText(completedBucket.getTitle());
-        // TODO: with 값이 없을 경우
-        holder.with.setText(completedBucket.getWith());
-        // TODO: 날짜 형식
-        holder.date.setText(completedBucket.getDate().toString());
+        // 날짜 형식(Date -> String)
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일");
+        holder.date.setText(sdf.format(completedBucket.getDate()));
         holder.location.setText(completedBucket.getLocation());
+        if(completedBucket.getWith().equals("")) {
+            // with 값이 없을 경우
+            holder.hyphen.setVisibility(View.INVISIBLE);
+            holder.with.setVisibility(View.INVISIBLE);
+            holder.withSub.setVisibility(View.INVISIBLE);
+        } else {
+            // with 값이 있을 경우
+            holder.hyphen.setVisibility(View.VISIBLE);
+            holder.with.setVisibility(View.VISIBLE);
+            holder.withSub.setVisibility(View.VISIBLE);
+            holder.with.setText(completedBucket.getWith());
+        }
         holder.picture.setImageResource(R.drawable.icon_picture);
     }
 
@@ -155,6 +175,10 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
         @BindView(R.id.completed_bucket_date) TextView date;
         @BindView(R.id.completed_bucket_location) TextView location;
         @BindView(R.id.completed_bucket_picture) ImageView picture;
+
+        @BindView(R.id.completed_bucket_hyphen) TextView hyphen;
+        @BindView(R.id.completed_bucket_with_sub) TextView withSub;
+
         public CompletedBucket data;
 
         public ViewHolder(View itemView) {

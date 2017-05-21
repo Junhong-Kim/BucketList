@@ -118,8 +118,8 @@ public class CompletedBucket extends RealmObject {
         completedBucket.setTitle(title);
         completedBucket.setDate(new Date(System.currentTimeMillis()));
         completedBucket.setLocation("어딘가");
-        completedBucket.setWith("친구");
-        completedBucket.setMemo(null);
+        completedBucket.setWith("");
+        completedBucket.setMemo("");
         completedBucket.setPicture(R.drawable.icon_picture);
 
         // CompletedBucketList에 CompletedBucket 추가
@@ -131,8 +131,22 @@ public class CompletedBucket extends RealmObject {
         findOne(realm, position).deleteFromRealm();
     }
 
+    // UPDATE Completed Bucket
+    public static void update(Realm realm, CompletedBucket updatedBucket) {
+        // title에 해당하는 버킷을 가져와서 update된 데이터로 변경
+        CompletedBucket completedBucket = realm.where(CompletedBucket.class)
+                                               .equalTo("title", updatedBucket.getTitle())
+                                               .findFirst();
+
+        completedBucket.setDate(updatedBucket.getDate());
+        completedBucket.setLocation(updatedBucket.getLocation());
+        completedBucket.setWith(updatedBucket.getWith());
+        completedBucket.setMemo(updatedBucket.getMemo());
+        completedBucket.setPicture(updatedBucket.getPicture());
+    }
+
     // FIND Bucket
-    private static CompletedBucket findOne(Realm realm, int position) {
+    public static CompletedBucket findOne(Realm realm, int position) {
         return realm.where(CompletedBucket.class).equalTo("sequence", position).findFirst();
     }
 }
