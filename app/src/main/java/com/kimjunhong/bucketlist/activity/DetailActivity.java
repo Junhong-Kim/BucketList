@@ -6,7 +6,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -16,6 +18,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +34,7 @@ import android.widget.Toast;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.model.CompletedBucket;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -171,8 +175,21 @@ public class DetailActivity extends AppCompatActivity {
                                     completedBucket.setLocation(location.getText().toString());
                                     completedBucket.setWith(with.getText().toString());
                                     completedBucket.setMemo(memo.getText().toString());
-                                    // TODO: 이미지 정보 가져오기
-                                    completedBucket.setPicture(R.drawable.icon_picture);
+                                    // 이미지 정보 가져오기
+                                    if(picture.getDrawable() != null) {
+                                        // picture의 Drawable 가져오기
+                                        Drawable drawable = picture.getDrawable();
+                                        // picture Drawable의 bitmap 추출
+                                        Bitmap bitmap = ((BitmapDrawable)drawable).getBitmap();
+                                        // Stream 생성
+                                        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                                        // PNG로 변환(JPEG로 변환할 경우 검정색 화면만 나옴)
+                                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                                        // Stream에 있는 정보를 byte[]로 변환
+                                        byte[] bitMapData = stream.toByteArray();
+                                        // DB에 이미지 저장
+                                        completedBucket.setPicture(bitMapData);
+                                    }
 
                                     CompletedBucket.update(realm, completedBucket);
                                     Toast.makeText(getApplicationContext(), "수정 되었습니다", Toast.LENGTH_SHORT).show();
@@ -223,7 +240,14 @@ public class DetailActivity extends AppCompatActivity {
 
                     with.setText(completedBucket.getWith());
                     memo.setText(completedBucket.getMemo());
-                    picture.setImageDrawable(getResources().getDrawable(R.drawable.icon_picture));
+
+                    if(completedBucket.getPicture() != null) {
+                        // byte[]로 저장되어 있는 데이터를 bitmap으로 변환하여 가져오기
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
+                        Log.v("log", "DB Image info : " + completedBucket.getPicture());
+                        // picture에 image 정보 설정
+                        picture.setImageBitmap(bitmap);
+                    }
                 }
             });
         } finally {

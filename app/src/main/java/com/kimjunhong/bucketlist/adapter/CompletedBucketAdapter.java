@@ -3,6 +3,8 @@ package com.kimjunhong.bucketlist.adapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
@@ -149,18 +151,26 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
         holder.date.setText(sdf.format(completedBucket.getDate()));
         holder.location.setText(completedBucket.getLocation());
         if(completedBucket.getWith().equals("")) {
-            // with 값이 없을 경우
+            // DB에 with 데이터가 없을 경우
             holder.hyphen.setVisibility(View.INVISIBLE);
             holder.with.setVisibility(View.INVISIBLE);
             holder.withSub.setVisibility(View.INVISIBLE);
         } else {
-            // with 값이 있을 경우
+            // DB에 with 데이터가 있을 경우
             holder.hyphen.setVisibility(View.VISIBLE);
             holder.with.setVisibility(View.VISIBLE);
             holder.withSub.setVisibility(View.VISIBLE);
             holder.with.setText(completedBucket.getWith());
         }
-        holder.picture.setImageResource(R.drawable.icon_picture);
+
+        if(completedBucket.getPicture() == null) {
+            // DB에 picture 데이터가 없을 경우
+            holder.picture.setImageResource(R.drawable.icon_picture);
+        } else {
+            // DB에 picture 데이터가 있을 경우
+            Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
+            holder.picture.setImageBitmap(bitmap);
+        }
     }
 
     @Override

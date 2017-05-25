@@ -1,7 +1,5 @@
 package com.kimjunhong.bucketlist.model;
 
-import com.kimjunhong.bucketlist.R;
-
 import java.util.Date;
 
 import io.realm.Realm;
@@ -22,7 +20,7 @@ public class CompletedBucket extends RealmObject {
     private String location;
     private String with;
     private String memo;
-    private int picture;
+    private byte[] picture;
 
     public int getId() {
         return id;
@@ -80,11 +78,11 @@ public class CompletedBucket extends RealmObject {
         this.memo = memo;
     }
 
-    public int getPicture() {
+    public byte[] getPicture() {
         return picture;
     }
 
-    public void setPicture(int picture) {
+    public void setPicture(byte[] picture) {
         this.picture = picture;
     }
 
@@ -120,7 +118,7 @@ public class CompletedBucket extends RealmObject {
         completedBucket.setLocation("어딘가");
         completedBucket.setWith("");
         completedBucket.setMemo("");
-        completedBucket.setPicture(R.drawable.icon_picture);
+        completedBucket.setPicture(null);
 
         // CompletedBucketList에 CompletedBucket 추가
         completedBuckets.add(completedBucket);
