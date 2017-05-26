@@ -31,6 +31,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.model.CompletedBucket;
 
@@ -229,24 +230,19 @@ public class DetailActivity extends AppCompatActivity {
                     // 날짜 형식 (Date -> String)
                     SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일");
                     date.setText(sdf.format(completedBucket.getDate()));
-
-                    if(location.getText().equals("어딘가")) {
-                        // location 값이 없을 경우
-                        location.setText("");
-                    } else {
-                        // location 값이 있을 경우
-                        location.setText(completedBucket.getLocation());
-                    }
-
+                    location.setText(completedBucket.getLocation());
                     with.setText(completedBucket.getWith());
                     memo.setText(completedBucket.getMemo());
 
                     if(completedBucket.getPicture() != null) {
                         // byte[]로 저장되어 있는 데이터를 bitmap으로 변환하여 가져오기
-                        Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
+                        //Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
                         Log.v("log", "DB Image info : " + completedBucket.getPicture());
                         // picture에 image 정보 설정
-                        picture.setImageBitmap(bitmap);
+                        //picture.setImageBitmap(bitmap);
+                        Glide.with(getApplicationContext())
+                             .load(completedBucket.getPicture()).asBitmap()
+                             .into(picture);
                     }
                 }
             });

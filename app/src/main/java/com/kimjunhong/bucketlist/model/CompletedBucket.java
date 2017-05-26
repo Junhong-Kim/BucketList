@@ -115,7 +115,7 @@ public class CompletedBucket extends RealmObject {
         completedBucket.setSequence(nextSequence);
         completedBucket.setTitle(title);
         completedBucket.setDate(new Date(System.currentTimeMillis()));
-        completedBucket.setLocation("어딘가");
+        completedBucket.setLocation("");
         completedBucket.setWith("");
         completedBucket.setMemo("");
         completedBucket.setPicture(null);

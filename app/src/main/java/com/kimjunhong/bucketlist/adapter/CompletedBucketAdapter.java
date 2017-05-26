@@ -3,8 +3,6 @@ package com.kimjunhong.bucketlist.adapter;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AlertDialog;
@@ -19,6 +17,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.activity.DetailActivity;
 import com.kimjunhong.bucketlist.activity.MainActivity;
@@ -32,6 +31,7 @@ import io.realm.OrderedRealmCollection;
 import io.realm.Realm;
 import io.realm.RealmRecyclerViewAdapter;
 import io.realm.RealmResults;
+import jp.wasabeef.glide.transformations.CropCircleTransformation;
 
 /**
  * Created by INMA on 2017. 5. 13..
@@ -149,7 +149,15 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
         // 날짜 형식(Date -> String)
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy년 MM월 dd일");
         holder.date.setText(sdf.format(completedBucket.getDate()));
-        holder.location.setText(completedBucket.getLocation());
+        // 위치
+        if(completedBucket.getLocation().equals("")) {
+            // DB에 location 데이터가 없을 경우
+            holder.location.setText("어딘가");
+        } else {
+            // DB에 location 데이터가 있을 경우
+            holder.location.setText(completedBucket.getLocation());
+        }
+        // 누구랑
         if(completedBucket.getWith().equals("")) {
             // DB에 with 데이터가 없을 경우
             holder.hyphen.setVisibility(View.INVISIBLE);
@@ -162,14 +170,19 @@ public class CompletedBucketAdapter extends RealmRecyclerViewAdapter<CompletedBu
             holder.withSub.setVisibility(View.VISIBLE);
             holder.with.setText(completedBucket.getWith());
         }
-
+        // 사진
         if(completedBucket.getPicture() == null) {
             // DB에 picture 데이터가 없을 경우
             holder.picture.setImageResource(R.drawable.icon_picture);
         } else {
             // DB에 picture 데이터가 있을 경우
-            Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
-            holder.picture.setImageBitmap(bitmap);
+            // Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
+            // holder.picture.setImageBitmap(bitmap);
+            Glide.with(context)
+                 .load(completedBucket.getPicture()).asBitmap()
+                 .transform(new CropCircleTransformation(context))
+                 .placeholder(R.drawable.icon_picture)
+                 .into(holder.picture);
         }
     }
 
