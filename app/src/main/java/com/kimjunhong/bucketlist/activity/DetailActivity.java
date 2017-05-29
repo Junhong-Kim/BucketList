@@ -32,6 +32,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.model.CompletedBucket;
 
@@ -57,6 +59,7 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.editText_with) EditText with;
     @BindView(R.id.editText_memo) EditText memo;
     @BindView(R.id.imageView_picture) ImageView picture;
+    @BindView(R.id.adView_banner) AdView banner;
 
     boolean editFlag = true;
     static int REQUEST_PICTURE = 1;
@@ -77,6 +80,11 @@ public class DetailActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.icon_back);
+
+        AdRequest adRequest = new AdRequest.Builder()
+                                           .addTestDevice("6D55F1109C483970A5FC7E68FF5D5A34") // 갤럭시 노트2
+                                           .build();
+        banner.loadAd(adRequest);
 
         initView();
         initDatePicker();

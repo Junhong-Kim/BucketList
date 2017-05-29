@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">BucketList</string>
+    <string name="ad_app_id">ca-app-pub-4097755662674285~9371112853</string>
+    <string name="banner_ad_unit_id">ca-app-pub-4097755662674285/3324579251</string>
 </resources>

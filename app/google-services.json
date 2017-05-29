@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "211857597200",
+    "firebase_url": "https://fir-bucketlist-c991b.firebaseio.com",
+    "project_id": "firebase-bucketlist",
+    "storage_bucket": "firebase-bucketlist.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:211857597200:android:f25999235a8098c4",
+        "android_client_info": {
+          "package_name": "com.kimjunhong.bucketlist"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "211857597200-fg2onsoee4okp14cfvkd23kpc795u2bi.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "211857597200-fdvtjfiqtj4jeatcbompg4e9bfslk0dh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA-2FM9fNzMwr9FYwqnAu4GI-jofMqJTUg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-100065014-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
