@@ -1,30 +1,20 @@
 package com.kimjunhong.bucketlist.activity;
 
 import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -38,7 +28,6 @@ import com.kimjunhong.bucketlist.R;
 import com.kimjunhong.bucketlist.model.CompletedBucket;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -62,11 +51,8 @@ public class DetailActivity extends AppCompatActivity {
     @BindView(R.id.adView_banner) AdView banner;
 
     boolean editFlag = true;
-    static int REQUEST_PICTURE = 1;
-    static int REQUEST_PHOTO_ALBUM = 2;
-    static String SAMPLE_IMAGE = "ic_launcher.png";
+    static int REQUEST_PHOTO_ALBUM = 0;
 
-    Dialog dialog;
     Realm realm;
 
     @Override
@@ -83,6 +69,7 @@ public class DetailActivity extends AppCompatActivity {
 
         AdRequest adRequest = new AdRequest.Builder()
                                            .addTestDevice("6D55F1109C483970A5FC7E68FF5D5A34") // 갤럭시 노트2
+                                           .addTestDevice("49DD6674EE06C76088446D108A914D1C") // 갤럭시 노트4
                                            .build();
         banner.loadAd(adRequest);
 
@@ -92,40 +79,7 @@ public class DetailActivity extends AppCompatActivity {
         picture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(view.getId() == R.id.imageView_picture) {
-                    // 다이얼로그 생성
-                    AlertDialog.Builder builder = new AlertDialog.Builder(DetailActivity.this);
-                    // 커스텀 다이얼로그 가져오기
-                    View customLayout = View.inflate(DetailActivity.this, R.layout.dialog_picture,null);
-                    // 빌더에 다이얼로그 적용
-                    builder.setView(customLayout);
-
-                    dialog = builder.create();
-                    // 빌더 크기 적용
-                    WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-                    lp.copyFrom(dialog.getWindow().getAttributes());
-                    lp.width = 1000;
-                    lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
-
-                    dialog.show();
-
-                    // 디폴트 다이얼로그 투명화
-                    Window w = dialog.getWindow();
-                    w.setAttributes(lp);
-                    w.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-                    //카메라, 앨범 클릭
-                    customLayout.findViewById(R.id.dialog_button_camera).setOnClickListener(this);
-                    customLayout.findViewById(R.id.dialog_button_album).setOnClickListener(this);
-                } else if(view.getId() == R.id.dialog_button_camera){
-                    //다이얼로그 끄기 및 카메라 메소드
-                    dialog.dismiss();
-                    takePicture();
-                } else if(view.getId() == R.id.dialog_button_album){
-                    //다이얼로그 끄기 및 앨범 메소드
-                    dialog.dismiss();
-                    takeAlbum();
-                }
+                takeAlbum();
             }
         });
     }
@@ -245,7 +199,7 @@ public class DetailActivity extends AppCompatActivity {
                     if(completedBucket.getPicture() != null) {
                         // byte[]로 저장되어 있는 데이터를 bitmap으로 변환하여 가져오기
                         //Bitmap bitmap = BitmapFactory.decodeByteArray(completedBucket.getPicture(), 0, completedBucket.getPicture().length);
-                        Log.v("log", "DB Image info : " + completedBucket.getPicture());
+
                         // picture에 image 정보 설정
                         //picture.setImageBitmap(bitmap);
                         Glide.with(getApplicationContext())
@@ -289,22 +243,6 @@ public class DetailActivity extends AppCompatActivity {
         });
     }
 
-    private void takePicture(){
-        // 사진 찍기 인텐트, MediaStore.ACTION_IMAGE_CAPTURE 활용
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // 그 후 파일을 지정해야하는데 File의 앞 부분 매개변수에는 파일의 절대경로를 붙여야 한다.
-        // 그러나 직접 경로를 써넣으면 sdcard 접근이 안되므로
-        // Environment.getExternalStorageDirectory()로 접근해서 경로를 가져오고
-        // 두번째 매개 변수에 파일 이름을 넣어서 활용
-        File file = new File(Environment.getExternalStorageDirectory(), SAMPLE_IMAGE);
-        // 그 다음에 사진을 찍을때 그 파일을 현재 우리가 갖고있는 SAMPLE_IMAGE 저장해야한다.
-        // 그래서 경로를 putExtra를 이용해서 파일 형태로 넣는다.
-        // 그리고 실제로 이 파일이 가리키는 경로는 /mnt/sdcard/ic_launcher)
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
-        // 사진 찍기 인텐트를 불러온다.
-        startActivityForResult(intent, REQUEST_PICTURE);
-    }
-
     private void takeAlbum(){
         // 사진을 불러오는 인텐트, ACTION_PICK 활용
         Intent intent = new Intent(Intent.ACTION_PICK);
@@ -315,25 +253,10 @@ public class DetailActivity extends AppCompatActivity {
         startActivityForResult(intent, REQUEST_PHOTO_ALBUM);
     }
 
-    private Bitmap loadPicture(){
-        // 사진 찍은것을 로드 해오는데 사이즈를 조절, 일단 파일을 가져오고
-        File file = new File(Environment.getExternalStorageDirectory(), SAMPLE_IMAGE);
-        // 현재 찍은 사진을 조절, 조절하는 클래스를 만듬
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        // 사이즈 설정
-        options.inSampleSize = 4;
-        // 조정한 사진 돌려보내기
-        return BitmapFactory.decodeFile(file.getAbsolutePath(),options);
-    }
-
     protected void onActivityResult(int requestCode,int resultCode,Intent data){
         super.onActivityResult(requestCode, resultCode, data);
 
         if(resultCode==RESULT_OK){
-            if(requestCode==REQUEST_PICTURE){
-                // 사진을 찍은경우 그 사진을 로드
-                picture.setImageBitmap(loadPicture());
-            }
             if(requestCode==REQUEST_PHOTO_ALBUM){
                 // 앨범에서 호출한 경우 data는 이전 인텐트(사진갤러리)에서 선택한 영역을 가져옴
                 picture.setImageURI(data.getData());

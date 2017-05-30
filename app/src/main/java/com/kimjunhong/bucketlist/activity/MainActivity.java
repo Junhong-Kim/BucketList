@@ -9,12 +9,15 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
-import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.gun0912.tedpermission.PermissionListener;
@@ -37,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.tabLayout) TabLayout tabLayout;
     @BindView(R.id.viewPager) ViewPager viewPager;
-    @BindView(R.id.button_add) ImageButton addButton;
+    @BindView(R.id.button_add) ImageView addButton;
     @BindView(R.id.speech_bubble) LinearLayout speechBubble;
     @BindView(R.id.editText_bucket) EditText newBucket;
 
@@ -52,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         setSupportActionBar(toolbar);
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.setDisplayHomeAsUpEnabled(true);
 
         initViewPager();
         initView();
@@ -82,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
 
         tabLayout.addTab(tabLayout.newTab().setText("진행중 버킷 :<"));
         tabLayout.addTab(tabLayout.newTab().setText("완료한 버킷 :D"));
-        tabLayout.setTabTextColors(Color.LTGRAY, Color.BLUE);
+        tabLayout.setTabTextColors(Color.LTGRAY, Color.parseColor("#3F51B5"));
 
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -118,28 +119,45 @@ public class MainActivity extends AppCompatActivity {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(newBucket.getText().toString().equals("")) {
-                    Toast.makeText(MainActivity.this, "버킷을 입력해주세요", Toast.LENGTH_SHORT).show();
-                } else {
-                    try {
-                        realm = Realm.getDefaultInstance();
-                        realm.executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                // 말풍선 보이기
-                                showSpeechBubble();
-                                // Bucket 생성
-                                Bucket.create(realm, String.valueOf(newBucket.getText()));
-                                // EditText 초기화
-                                newBucket.setText("");
-                            }
-                        });
-                    } finally {
-                        realm.close();
-                    }
-                }
+                createNewBucket();
             }
         });
+
+        // 키보드 완료 버튼
+        newBucket.setImeOptions(EditorInfo.IME_ACTION_DONE); // 완료 버튼 클릭시
+        newBucket.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if(i == EditorInfo.IME_ACTION_DONE || keyEvent.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                    createNewBucket();
+                    return true;
+                }
+                return false;
+            }
+        });
+    }
+
+    private void createNewBucket() {
+        if(newBucket.getText().toString().equals("")) {
+            Toast.makeText(MainActivity.this, "버킷을 입력해주세요", Toast.LENGTH_SHORT).show();
+        } else {
+            try {
+                realm = Realm.getDefaultInstance();
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        // 말풍선 보이기
+                        showSpeechBubble();
+                        // Bucket 생성
+                        Bucket.create(realm, String.valueOf(newBucket.getText()));
+                        // EditText 초기화
+                        newBucket.setText("");
+                    }
+                });
+            } finally {
+                realm.close();
+            }
+        }
     }
 
     private void showSpeechBubble() {
@@ -169,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPermissionDenied(ArrayList<String> deniedPermissions) {
-                Toast.makeText(MainActivity.this, "거절된 권한\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "거부된 권한\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -177,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
                 .setPermissionListener(permissionListener)
                 .setRationaleMessage("원활한 서비스 이용을 위해\n앱의 권한이 필요합니다!\n\n- 개발자 올림 -")
                 .setDeniedMessage("앗.. 권한을 거부하셨어요!\n[설정] ► [권한]에서 권한을 허용하시면\n원활한 서비스 이용이 가능합니다.")
-                .setPermissions(Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 .check();
     }
 }
